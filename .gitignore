@@ -1,0 +1,21 @@
+# Obsidian 缓存和工作区状态（每台电脑不同，会频繁冲突）
+.obsidian/workspace.json
+.obsidian/workspace-mobile.json
+.obsidian/graph.json
+
+# 插件数据和缓存
+.obsidian/plugins/*/data.json
+.obsidian/cache/
+
+# 回收站
+.trash/
+
+# 操作系统文件
+.DS_Store
+Thumbs.db
+
+# 如果你不想同步插件本身（可选）
+# .obsidian/plugins/
+
+# 如果你不想同步主题（可选）
+# .obsidian/themes/
