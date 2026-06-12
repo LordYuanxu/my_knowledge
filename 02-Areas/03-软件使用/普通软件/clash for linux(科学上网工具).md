@@ -9,6 +9,8 @@ mkdir ~/.config/mihomo/
 cd ~/.config/mihomo/
 
 # 下载clash(https://v2free.net/ssr-download/clash-linux.tar.gz)
+wget --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36" \
+"https://v2free.net/ssr-download/clash-linux.tar.gz"
 ## 解压缩
 tar xvf clash-linux.tar.gz
 ## 授权可执行权限

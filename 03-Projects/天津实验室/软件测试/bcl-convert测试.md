@@ -72,3 +72,17 @@ CPU使用率=1145%
 CPU使用率=1189%
 程序耗时=176.38s
 ```
+
+# 特殊情况测试
+## 1. CreateFastqForIndexReads为1测试
+
+修改sample_sheet.csv中的信息
+
+文件名后缀为
+>R1_001.fastq.gz
+>R2_001.fastq.gz
+>I1_001.fastq.gz
+>I2_001.fastq.gz 
+## 2.拆分不出数据
+
+空fastq.gz文件会生成
