@@ -3,5 +3,6 @@
   "strictLineBreaks": true,
   "showLineNumber": true,
   "rightToLeft": false,
-  "alwaysUpdateLinks": true
+  "alwaysUpdateLinks": true,
+  "focusNewTab": true
 }

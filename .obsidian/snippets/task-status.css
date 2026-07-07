@@ -1,0 +1,96 @@
+/* ============================================
+   Obsidian 任务状态 - 内联 SVG 图案版
+   所有图案本地生成，无需下载
+   ============================================ */
+
+/* 基础：清除默认 checkbox 样式，统一尺寸 */
+input[type="checkbox"][data-task]:checked,
+input[type="checkbox"][data-task="&gt;"]:checked,
+li[data-task] input[type="checkbox"]:checked,
+li[data-task] > p input[type="checkbox"]:checked {
+    -webkit-appearance: none !important;
+    appearance: none !important;
+    -webkit-mask-image: none !important;
+    mask-image: none !important;
+    width: 16px !important;
+    height: 16px !important;
+    border: none !important;
+    background-color: transparent !important;
+    background-repeat: no-repeat !important;
+    background-position: center !important;
+    background-size: contain !important;
+    cursor: pointer !important;
+    position: relative !important;
+    margin: 0 6px 0 0 !important;
+    vertical-align: middle !important;
+}
+
+/* ========== [x] 已完成 - 绿色对勾 ========== */
+input[data-task="x"]:checked,
+li[data-task="x"] input[type="checkbox"]:checked {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M20 55 L40 75 L80 25' fill='none' stroke='%234CAF50' stroke-width='12' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") !important;
+}
+
+/* ========== [-] 已取消/中止 - 灰色叉号 ========== */
+input[data-task="-"]:checked,
+li[data-task="-"] input[type="checkbox"]:checked {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M25 25 L75 75 M75 25 L25 75' fill='none' stroke='%239E9E9E' stroke-width='12' stroke-linecap='round'/%3E%3C/svg%3E") !important;
+}
+
+/* ========== [/] 进行中 - 橙色半圆进度 ========== */
+input[data-task="/"]:checked,
+li[data-task="/"] input[type="checkbox"]:checked {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='40' fill='none' stroke='%23FFE0B2' stroke-width='10'/%3E%3Cpath d='M50 10 A40 40 0 0 1 90 50' fill='none' stroke='%23FF9800' stroke-width='10' stroke-linecap='round'/%3E%3C/svg%3E") !important;
+}
+
+/* ========== [>] 以后再说 - 蓝色右箭头 ========== */
+input[data-task=">"]:checked,
+input[data-task="&gt;"]:checked,
+li[data-task=">"] input[type="checkbox"]:checked,
+li[data-task="&gt;"] input[type="checkbox"]:checked {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M30 20 L70 50 L30 80' fill='none' stroke='%232196F3' stroke-width='12' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") !important;
+}
+
+/* ========== [!] 阻塞/有问题 - 红色感叹号 ========== */
+input[data-task="!"]:checked,
+li[data-task="!"] input[type="checkbox"]:checked {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='75' r='7' fill='%23F44336'/%3E%3Cpath d='M50 15 L50 60' fill='none' stroke='%23F44336' stroke-width='12' stroke-linecap='round'/%3E%3C/svg%3E") !important;
+}
+
+/* ========== [?] 待确认/疑问 - 紫色问号 ========== */
+input[data-task="?"]:checked,
+li[data-task="?"] input[type="checkbox"]:checked {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M35 35 Q35 15 50 15 Q65 15 65 30 Q65 42 50 50 L50 65' fill='none' stroke='%239C27B0' stroke-width='10' stroke-linecap='round'/%3E%3Ccircle cx='50' cy='80' r='6' fill='%239C27B0'/%3E%3C/svg%3E") !important;
+}
+
+/* ========== [*] 高优先级 - 金色实心星 ========== */
+input[data-task="*"]:checked,
+li[data-task="*"] input[type="checkbox"]:checked {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M50 5 L63 38 L97 38 L69 58 L79 92 L50 72 L21 92 L31 58 L3 38 L37 38 Z' fill='%23FFD700'/%3E%3C/svg%3E") !important;
+}
+
+/* ========== [~] 低优先级 - 青色波浪线 ========== */
+input[data-task="~"]:checked,
+li[data-task="~"] input[type="checkbox"]:checked {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M10 50 Q25 30 40 50 T70 50 T100 50' fill='none' stroke='%2300BCD4' stroke-width='10' stroke-linecap='round'/%3E%3C/svg%3E") !important;
+}
+
+/* ========== 文字样式 ========== */
+li[data-task="x"] {
+    color: #888 !important;
+    text-decoration: line-through !important;
+    opacity: 0.7 !important;
+}
+li[data-task="-"] {
+    color: #999 !important;
+    text-decoration: line-through !important;
+    opacity: 0.5 !important;
+}
+li[data-task="!"] {
+    color: #C62828 !important;
+    font-weight: 500 !important;
+}
+li[data-task="*"] {
+    color: #333 !important;
+    font-weight: 600 !important;
+}

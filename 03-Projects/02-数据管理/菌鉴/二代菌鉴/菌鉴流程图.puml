@@ -1,0 +1,148 @@
+@startuml
+skinparam backgroundColor #FEFEFE
+skinparam handwritten false
+skinparam defaultTextAlignment center
+skinparam wrapWidth 250
+skinparam ArrowColor #1565C0
+skinparam ArrowThickness 2
+
+skinparam defaultFontName "FiraCode"
+skinparam activityFontName "FiraCode"
+skinparam activityArrowFontName "FiraCode"
+skinparam titleFontName "FiraCode"
+skinparam titleFontSize 16
+
+skinparam activity {
+  BackgroundColor #E3F2FD
+  BackgroundColor<<m2>> #E1F5FE
+  BackgroundColor<<trim>> #FFF8E1
+  BackgroundColor<<align>> #FFF3E0
+  BackgroundColor<<judge>> #FFE0B2
+  BackgroundColor<<fungi>> #F3E5F5
+  BackgroundColor<<bacteria>> #E0F2F1
+  BackgroundColor<<contam>> #FFCDD2
+  BackgroundColor<<output>> #C8E6C9
+  BackgroundColor<<single>> #FFF8E1
+  BorderColor #333333
+  BorderThickness 2
+  ArrowColor #1565C0
+  ArrowThickness 2
+}
+
+title 菌种鉴定流程图（一代 Sanger 测序）—— 最终修正版
+
+start
+
+:输入 ab1 测序文件
+（正向 + 反向）;
+
+: SangerRead 读取 ab1
+- M1 初步修剪（错误概率阈值 0.0001）
+- signalRatioCutoff = 0.33（标注次峰）;
+
+: M2 滑窗质控 <<m2>>
+- CutoffQualityScore = 40
+- SlidingWindowSize = 30
+- 获取 trimmedStartPos / trimmedFinishPos;
+
+:按产品类型截取序列 <<trim>>
+- bacterial: start+50 / end-100（若 qcLength>550）
+- other（真菌）: start+15 / end-15
+- 得到 newstart / newend;
+
+:主峰 vs 次峰比对 <<align>>
+- primarySeq(newstart:newend)
+  vs secondarySeq(newstart:newend)
+- type = global-local
+- 生成 .pa 比对文件（含 identity / SNP数）;
+
+if (质控后长度 大于等于 原始长度乘30%?) then (否)
+  :判定：污染 <<contam>>
+（质控长度不足30%）;
+else (是)
+  if (产品类型判断) then (细菌基因组完成图)
+    :SNP数 小于等于 12bp? <<judge>>
+（主峰/次峰差异）;
+    if (SNP数 小于等于 12?) then (否)
+      :判定：污染 <<contam>>
+（SNP 大于 12）;
+    else (是)
+      :判定：正常 <<output>>;
+    endif
+  elseif (原核链特异性转录组测序)
+    :identity 大于等于 98.95? <<judge>>
+（主峰/次峰一致性）;
+    if (identity 大于等于 98.95?) then (否)
+      :判定：污染风险 <<contam>>
+（identity 小于 98.95）;
+    else (是)
+      :判定：正常 <<output>>;
+    endif
+  else (其他产品)
+    :identity 大于等于 99? <<judge>>
+（主峰/次峰一致性）;
+    if (identity 大于等于 99?) then (否)
+      :判定：污染 <<contam>>
+（identity 小于 99）;
+    else (是)
+      :判定：正常 <<output>>;
+    endif
+  endif
+endif
+
+:污染判定结果汇总 <<contam>>
+（正常 / 污染 / 污染风险）
+继续下游流程;
+
+:输出结果文件 <<output>>
+- .seq  完整主峰序列（无截取）
+- .fa   M2 质控后完整序列（start:end，
+        无额外截取，用于 Phrap 拼接）
+- .pa   主峰/次峰比对结果（截取后）
+- .report  原始长度 / 修剪长度 / 一致性;
+
+:Phrap 序列拼接 <<fungi>>
+（使用 .fa 质控后完整序列）;
+
+if (拼接是否成功?) then (是)
+  :拼接结果 <<output>>
+（contig 序列）;
+else (否)
+  :单端 fasta 文件 <<single>>
+（正向或反向）;
+endif
+
+:引物类型判断 <<judge>>;
+
+if (引物类型) then (真菌引物)
+  :NL1 / NL4 / ITS1 / ITS4
+指向 真菌数据库 <<fungi>>;
+  :nt_euk_20230605
+（真菌数据库） <<fungi>>;
+elseif (细菌引物)
+  :338F / 806R / 1492R / 27F
+指向 细菌数据库 <<bacteria>>;
+  :nt_prok_20230605
+（细菌数据库） <<bacteria>>;
+endif
+
+:BLAST 比对
+- 对应数据库
+- 每个查询最大命中数 = 20;
+
+:Taxon 解析
+- 获取菌种分类信息（界门纲目科属种）
+- 统计所有命中结果
+- 取出现最多次数的物种
+  作为最终鉴定结果;
+
+:输出鉴定结果 <<output>>
+- 菌种名称 / 相似度 / 覆盖度
+- 分类谱系（界门纲目科属种）
+- 拼接质量 / 污染提示 / 引物信息
+- 质控参数（M1/M2/截取策略）
+- BLAST 命中数 / 众数投票结果;
+
+stop
+
+@enduml

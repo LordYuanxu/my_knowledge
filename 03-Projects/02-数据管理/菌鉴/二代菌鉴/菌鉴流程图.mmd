@@ -1,0 +1,86 @@
+flowchart TD
+    %% 样式定义
+    classDef sanger fill:#E3F2FD,stroke:#1565C0,stroke-width:2px
+    classDef m2 fill:#E1F5FE,stroke:#0288D1,stroke-width:2px
+    classDef trim fill:#FFF8E1,stroke:#F57F17,stroke-width:2px
+    classDef align fill:#FFF3E0,stroke:#EF6C00,stroke-width:2px
+    classDef judge fill:#FFE0B2,stroke:#E65100,stroke-width:2px
+    classDef fungi fill:#F3E5F5,stroke:#6A1B9A,stroke-width:2px
+    classDef bacteria fill:#E0F2F1,stroke:#00695C,stroke-width:2px
+    classDef contam fill:#FFCDD2,stroke:#D32F2F,stroke-width:2px
+    classDef output fill:#C8E6C9,stroke:#2E7D32,stroke-width:2px
+    classDef single fill:#FFF8E1,stroke:#F57F17,stroke-width:2px
+    classDef blast fill:#E0F7FA,stroke:#00838F,stroke-width:2px
+    classDef taxon fill:#E8EAF6,stroke:#3F51B5,stroke-width:2px
+    classDef startend fill:#C8E6C9,stroke:#2E7D32,stroke-width:2px
+
+    %% 主流程
+    Start([开始]) --> A[输入 ab1 测序文件<br/>（正向 + 反向）]
+    A --> B[SangerRead 读取 ab1<br/>- M1 初步修剪（错误概率阈值 0.0001）<br/>- signalRatioCutoff = 0.33（标注次峰）]
+    B --> C[M2 滑窗质控<br/>- CutoffQualityScore = 40<br/>- SlidingWindowSize = 30<br/>- 获取 trimmedStartPos / trimmedFinishPos]
+    C --> D[按产品类型截取序列<br/>- bacterial: start+50 / end-100（若 qcLength>550）<br/>- other（真菌）: start+15 / end-15<br/>- 得到 newstart / newend]
+    D --> E[主峰 vs 次峰比对<br/>- primarySeq(newstart:newend) vs secondarySeq(newstart:newend)<br/>- type = global-local<br/>- 生成 .pa 比对文件（含 identity / SNP数）]
+
+    %% 污染判定分支
+    E --> F{质控后长度<br/>≥ 原始长度 × 30%?}
+    F -- 否 --> G[判定：污染<br/>（质控长度不足30%）]
+    F -- 是 --> H{产品类型判断}
+
+    H -- 细菌基因组<br/>完成图 --> I{SNP数 ≤ 12bp?<br/>（主峰/次峰差异）}
+    I -- 否 --> J[判定：污染<br/>（SNP > 12）]
+    I -- 是 --> K[判定：正常]
+
+    H -- 原核链特异性<br/>转录组测序 --> L{identity ≥ 98.95?<br/>（主峰/次峰一致性）}
+    L -- 否 --> M[判定：污染风险<br/>（identity < 98.95）]
+    L -- 是 --> K
+
+    H -- 其他产品 --> N{identity ≥ 99?<br/>（主峰/次峰一致性）}
+    N -- 否 --> O[判定：污染<br/>（identity < 99）]
+    N -- 是 --> K
+
+    %% 汇总
+    G --> P[污染判定结果汇总<br/>（正常 / 污染 / 污染风险）<br/>继续下游流程]
+    J --> P
+    M --> P
+    O --> P
+    K --> P
+
+    %% 下游流程
+    P --> Q[输出结果文件<br/>- .seq → 完整主峰序列（无截取）<br/>- .fa → M2 质控后完整序列（start:end，用于 Phrap 拼接）<br/>- .pa → 主峰/次峰比对结果（截取后）<br/>- .report → 原始长度 / 修剪长度 / 一致性]
+    Q --> R[Phrap 序列拼接<br/>（使用 .fa 质控后完整序列）]
+    R --> S{拼接是否成功?}
+    S -- 是 --> T[拼接结果<br/>（contig 序列）]
+    S -- 否 --> U[单端 fasta 文件<br/>（正向或反向）]
+
+    T --> V{引物类型判断}
+    U --> V
+
+    %% 引物分支
+    V -- 真菌引物 --> W[NL1 / NL4 / ITS1 / ITS4<br/>→ 真菌数据库]
+    W --> X[nt_euk_20230605<br/>（真菌数据库）]
+
+    V -- 细菌引物 --> Y[338F / 806R / 1492R / 27F<br/>→ 细菌数据库]
+    Y --> Z[nt_prok_20230605<br/>（细菌数据库）]
+
+    %% BLAST + Taxon + 输出
+    X --> AA[BLAST 比对<br/>- 对应数据库<br/>- 每个查询最大命中数 = 20]
+    Z --> AA
+    AA --> AB[Taxon 解析<br/>- 获取菌种分类信息（界门纲目科属种）<br/>- 统计所有命中结果<br/>- 取出现最多次数的物种<br/>  作为最终鉴定结果（众数投票）]
+    AB --> AC[输出鉴定结果<br/>- 菌种名称 / 相似度 / 覆盖度<br/>- 分类谱系（界门纲目科属种）<br/>- 拼接质量 / 污染提示 / 引物信息<br/>- 质控参数（M1/M2/截取策略）<br/>- BLAST 命中数 / 众数投票结果]
+    AC --> End([结束])
+
+    %% 样式绑定
+    class Start,End startend
+    class B sanger
+    class C m2
+    class D trim
+    class E align
+    class F,H,I,L,N,V judge
+    class G,J,M,O contam
+    class K,P,Q,T,AC output
+    class U single
+    class W,X fungi
+    class Y,Z bacteria
+    class AA blast
+    class AB taxon
+    class R fungi
