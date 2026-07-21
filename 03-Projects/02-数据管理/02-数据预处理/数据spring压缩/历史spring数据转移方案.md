@@ -79,3 +79,37 @@ compute-5之前的都是10Gbps网卡
 ## 三.预估
 
 1. 如果在宁波运行，转移速度可以达到1GiB/s, **800T大概需要耗时12天**
+
+## 四.实际测试
+
+希望能够往新的bucket中传输
+
+```bash
+# 新建bucket
+mc mb s3nb2/archive
+
+# MJ-M-20221124105
+rclone copy \
+s3nb3:dataprocess/2026/DataProcessSpring/ningbo/20260209/DataProcessSpring_69894db0add9b72cff7fb562_20260209_110001/ \
+s3nb2:archive/2026/DataProcessSpring/ningbo/20260209/DataProcessSpring_69894db0add9b72cff7fb562_20260209_110001/ \
+--transfers 64 \
+--checkers 128 \
+--s3-copy-cutoff 64M \
+--s3-upload-cutoff 64M \
+--s3-chunk-size 64M \
+--metadata \
+--checksum \
+--fast-list \
+--max-backlog 200000 \
+-P \
+--log-file rclone_copy.log \
+--log-level INFO
+```
+
+遇到的问题
+1. 原来项目的文件大小没有一个汇总的字段(后面可以加上)
+2. 验证: 如果相同的分片处理，可以根据ETag是否一致进行检查
+3. data_process_spring主表加几个字段表示转移状态
+	- transfer_status: "end"
+	- transfer_path: "s3nb2://archive/2026/DataProcessSpring/ningbo/20260209/DataProcessSpring_69894db0add9b72cff7fb562_20260209_110001/"
+	- transfer_ts: "2026-07-20 16:01:34"
